@@ -1,11 +1,22 @@
+import {  useState } from "react"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("token") !== null);
+  
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-    </div>
+    <Router>
+      <Routes>
+        {!isLoggedIn ? (
+          <Route path="*" element={<Login onLogin={() => setIsLoggedIn(true)} />} />) : (
+            <Route path="*" element={<Dashboard />} />
+          )
+         }
+      </Routes>
+    </Router>
   )
 }
 
