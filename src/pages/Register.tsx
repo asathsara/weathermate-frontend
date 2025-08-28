@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { login } from "../services/auth";
+import { register } from "../services/auth";
 
 
-export default function Login({ onLogin }: { onLogin: () => void }) {
+export default function Register({ onRegister }: { onRegister: () => void }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -11,10 +11,10 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await login(username, password);
-            if (res.accessToken) onLogin();
+            await register(username, password);
+            onRegister();
         } catch {
-            setError("Login failed");
+            setError("Registration failed");
         }
     };
 
@@ -22,11 +22,16 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-sm w-full p-8 bg-white rounded-lg shadow-lg">
-                <h2 className="text-2xl font-semibold text-center text-gray-800">Sign In</h2>
-                {error && <p className="text-red-500">{error}</p>}
+                <h2 className="text-2xl font-semibold text-center text-gray-800">Register</h2>
+
+                {error &&
+                    <p className="text-red-500">{error}</p>}
+
                 <input placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} className="border p-3 rounded" />
+
                 <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="border p-3 rounded" />
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded">Sign In</button>
+
+                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white p-3 rounded">Sign Up</button>
             </form>
         </div>
     );
