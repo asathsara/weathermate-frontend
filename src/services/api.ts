@@ -36,7 +36,7 @@ apiClient.interceptors.response.use(
     res => res,
     async error => {
         const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
 
             // Prevent infinite retry loops
             originalRequest._retry = true;
