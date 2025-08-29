@@ -1,42 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
+import apiClient , {setAccessToken} from "./services/api";
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
+
+  useEffect(() => {
+    const checkRefresh = async () => {
+      try {
+        const res = await apiClient.get("/refresh");
+        if (res.data.accessToken) {
+          setAccessToken(res.data.accessToken); 
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
+      } catch {
+        console.log("Not logged in");
+        setIsLoggedIn(false);
+      }
+    };
+    checkRefresh();
+  }, []);
+
+
+  if (isLoggedIn === null) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
   return (
     <Router>
       <Routes>
-        {/* If not logged in, show login page */}
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             !isLoggedIn ? (
               <Login onLogin={() => setIsLoggedIn(true)} />
             ) : (
               <Navigate to="/dashboard" />
             )
-          } 
+          }
         />
-        
-        {/* Dashboard route */}
-        <Route 
-          path="/dashboard" 
+        <Route
+          path="/dashboard"
           element={
-            isLoggedIn ? (
-              <Dashboard />
-            ) : (
-              <Navigate to="/login" />
-            )
-          } 
+            isLoggedIn ? <Dashboard /> : <Navigate to="/login" />
+          }
         />
-
-        {/* Register route*/}
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             !isLoggedIn ? (
               <Register onRegister={() => setIsLoggedIn(false)} />
@@ -45,17 +60,15 @@ const App = () => {
             )
           }
         />
-
-        {/* Catch-all route */}
-        <Route 
-          path="*" 
+        <Route
+          path="*"
           element={
             isLoggedIn ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-          } 
+          }
         />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;

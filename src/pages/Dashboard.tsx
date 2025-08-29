@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   const fetchHistory = async () => {
     try {
-      const res = await apiClient.get('api/history');
+      const res = await apiClient.get('/api/history');
       setHistory(res.data);
     } catch (err) {
       console.error(err);
@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   const handleSearch = async () => {
     try {
-      const res = await apiClient.get(`api/weather/${city}`);
+      const res = await apiClient.get(`/api/weather/${city}`);
       setWeather(res.data);
       fetchHistory();
     } catch (err) {
