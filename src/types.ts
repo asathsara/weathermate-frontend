@@ -1,9 +1,18 @@
 export interface Weather {
-  city: string;
-  temp: number;
-  description: string;
-  searchedAt: string; // keep as string since backend sends ISO or formatted date
+  main: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  wind: {
+    speed: number;
+  };
 }
 
-// If you want a collection of history
-export type History = Weather[];
+
+export interface History{
+  id: number;
+  city: string;
+  searchedAt: string; 
+  temperature: number;
+};

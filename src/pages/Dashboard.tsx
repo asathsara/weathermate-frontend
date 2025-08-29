@@ -6,7 +6,7 @@ import type { Weather, History } from "../types";
 export default function Dashboard() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState<Weather | null>(null);
-  const [history, setHistory] = useState<History>([]);
+  const [history, setHistory] = useState<History[]>([]);
 
 
   const fetchHistory = async () => {
@@ -43,8 +43,8 @@ export default function Dashboard() {
 
       {weather && (
         <div className="p-4 border rounded mb-4">
-          <h2 className="text-lg font-bold">{weather.city}</h2>
-          <p>{weather.temp}°C, {weather.description}</p>
+          <h2 className="text-lg font-bold">{city}</h2>
+          <p>{weather.main.temp}°C, {weather.wind.speed}</p>
         </div>
       )}
 
@@ -53,7 +53,7 @@ export default function Dashboard() {
       <ul className="list-disc pl-5">
         {history.map((h, idx) => (
           <li key={idx}>
-            {h.city} - {h.temp}°C - {h.description} ({h.searchedAt})
+            {h.id} - {h.city}°C - {h.temperature} ({h.searchedAt})
           </li>
         ))}
       </ul>
