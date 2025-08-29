@@ -47,7 +47,7 @@ const App = () => {
         <Route
           path="/dashboard"
           element={
-            isLoggedIn ? <Dashboard /> : <Navigate to="/login" />
+            isLoggedIn ? <Dashboard setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/login" />
           }
         />
         <Route

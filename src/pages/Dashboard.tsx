@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import apiClient from "../services/api";
 import type { Weather, History } from "../types";
+import { setAccessToken } from "../services/api";
 
 
-export default function Dashboard() {
+type DashboardProps = {
+  setIsLoggedIn: (loggedIn: boolean) => void;
+};
+
+export default function Dashboard({ setIsLoggedIn } : DashboardProps) {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState<Weather | null>(null);
   const [history, setHistory] = useState<History[]>([]);
@@ -29,13 +34,28 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = async () => {
+
+    try {
+      await apiClient.post('/logout');
+      setAccessToken("");
+      setIsLoggedIn(false);
+
+      
+    }catch (err) {
+      console.error(err);
+    }
+  }
+
 
   useEffect(() => { fetchHistory(); }, []);
 
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <div className="flex gap-2 mb-4">
+
+      <button className="bg-red-300 p-2 text-white rounded cursor-pointer" onClick={handleLogout}>Logout</button>
+      <div className="flex gap-2 mb-4 mt-4">
         <input value={city} onChange={e => setCity(e.target.value)} placeholder="Enter city..." className="border p-2 flex-1" />
         <button onClick={handleSearch} className="bg-green-500 text-white p-2 rounded">Search</button>
       </div>
