@@ -1,9 +1,19 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
+// Custom error type for authentication errors
+export interface AuthAxiosError extends AxiosError {
+    isAuthError?: boolean;
+}
 
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true, // ensures refresh token cookie is sent
+});
+
+// Separate client for refresh
+const refreshClient = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL,
+    withCredentials: true,
 });
 
 
@@ -11,28 +21,46 @@ let accessToken: string | null = null;
 
 
 // Attach access token to requests
+// This ensures all requests carry the current access token automatically.
 apiClient.interceptors.request.use(config => {
     if (accessToken) config.headers.Authorization = `Bearer ${accessToken}`;
     return config;
 });
 
 
+
 // Handle 401 by refreshing access token
 apiClient.interceptors.response.use(
+
+    // Just returns successful responses unchanged
     res => res,
     async error => {
         const originalRequest = error.config;
         if (error.response?.status === 401 && !originalRequest._retry) {
+
+            // Prevent infinite retry loops
             originalRequest._retry = true;
+
             try {
-                const refreshRes = await apiClient.get('/refresh');
+                const refreshRes = await refreshClient.get('/refresh');
                 accessToken = refreshRes.data.accessToken;
                 originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+                // Retry the original request with the new access token
                 return apiClient(originalRequest);
+
             } catch (err) {
+
+                // If refresh fails, log out the user
                 accessToken = null;
-                window.location.href = '/login';
-                return Promise.reject(err);
+
+                // cast error safely
+                const authError: AuthAxiosError = {
+                    ...(err as AxiosError),
+                    isAuthError: true,
+                };
+                return Promise.reject(authError);
+
             }
         }
         return Promise.reject(error);

@@ -3,7 +3,7 @@ import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
-import apiClient , {setAccessToken} from "./services/api";
+import apiClient, { setAccessToken, type AuthAxiosError } from "./services/api";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
@@ -13,14 +13,16 @@ const App = () => {
       try {
         const res = await apiClient.get("/refresh");
         if (res.data.accessToken) {
-          setAccessToken(res.data.accessToken); 
+          setAccessToken(res.data.accessToken);
           setIsLoggedIn(true);
         } else {
           setIsLoggedIn(false);
         }
-      } catch {
-        console.log("Not logged in");
-        setIsLoggedIn(false);
+      } catch (err: unknown) {
+        const authErr = err as AuthAxiosError;
+        if (authErr.isAuthError) {
+          setIsLoggedIn(false);
+        }
       }
     };
     checkRefresh();
