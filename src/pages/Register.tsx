@@ -13,6 +13,11 @@ export default function Register({ onRegister }: { onRegister: () => void }) {
         try {
             await register(username, password);
             onRegister();
+            
+            // Clear form fields after successful registration
+            setUsername("");
+            setPassword("");
+            setError("");
         } catch {
             setError("Registration failed");
         }
@@ -31,7 +36,7 @@ export default function Register({ onRegister }: { onRegister: () => void }) {
 
                 <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="border p-3 rounded" />
 
-                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white p-3 rounded">Sign Up</button>
+                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white p-3 rounded cursor-pointer">Sign Up</button>
             </form>
         </div>
     );

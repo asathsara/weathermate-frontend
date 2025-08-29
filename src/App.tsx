@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Register from "./pages/Register";
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +39,7 @@ const App = () => {
           path="/register" 
           element={
             !isLoggedIn ? (
-              <Login onLogin={() => setIsLoggedIn(true)} />
+              <Register onRegister={() => setIsLoggedIn(false)} />
             ) : (
               <Navigate to="/dashboard" />
             )
