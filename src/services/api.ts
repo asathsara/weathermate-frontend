@@ -1,9 +1,6 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 // Custom error type for authentication errors
-export interface AuthAxiosError extends AxiosError {
-    isAuthError?: boolean;
-}
 
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -11,7 +8,7 @@ const apiClient = axios.create({
 });
 
 // Separate client for refresh
-const refreshClient = axios.create({
+export const refreshClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
 });
@@ -53,13 +50,7 @@ apiClient.interceptors.response.use(
 
                 // If refresh fails, log out the user
                 accessToken = null;
-
-                // cast error safely
-                const authError: AuthAxiosError = {
-                    ...(err as AxiosError),
-                    isAuthError: true,
-                };
-                return Promise.reject(authError);
+                return Promise.reject(err);
 
             }
         }
