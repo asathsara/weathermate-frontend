@@ -1,24 +1,8 @@
-import { useState, useEffect } from 'react';
-import apiClient, { setAccessToken } from '../services/api';
+import { useContext } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 
-
-export const useAuth = () => {
-    const [authenticated, setAuthenticated] = useState(false);
-
-
-    useEffect(() => {
-        const refresh = async () => {
-            try {
-                const res = await apiClient.get('/refresh');
-                setAccessToken(res.data.accessToken);
-                setAuthenticated(true);
-            } catch {
-                setAuthenticated(false);
-            }
-        };
-        refresh();
-    }, []);
-
-
-    return { authenticated, setAuthenticated };
-};
+export function useAuth() {
+    const context = useContext(AuthContext);
+    if (!context) throw new Error("useAuth must be used within AuthProvider");
+    return context;
+}
