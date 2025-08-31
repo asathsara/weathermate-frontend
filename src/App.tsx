@@ -1,74 +1,52 @@
-import { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthProvider";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
-import { setAccessToken, refreshClient } from "./services/api";
+import { ProtectedRoute } from "./contexts/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
 
-const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null); // null = loading
-
-  useEffect(() => {
-    const checkRefresh = async () => {
-      try {
-        const res = await refreshClient.get("/refresh");
-        if (res.data.accessToken) {
-          setAccessToken(res.data.accessToken);
-          setIsLoggedIn(true);
-        } else {
-          setIsLoggedIn(false);
-        }
-      } catch {
-        // Refresh token missing or expired
-        setIsLoggedIn(false);
-      }
-    };
-    checkRefresh();
-  }, []);
-
-
-  if (isLoggedIn === null) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
+// Separate component so it can use `useAuth`
+function AppRoutes() {
+  const { isLoggedIn } = useAuth();
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/login"
-          element={
-            !isLoggedIn ? (
-              <Login onLogin={() => setIsLoggedIn(true)} />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            isLoggedIn ? <Dashboard setIsLoggedIn={setIsLoggedIn} /> : <Navigate to="/login" />
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            !isLoggedIn ? (
-              <Register onRegister={() => setIsLoggedIn(false)} />
-            ) : (
-              <Navigate to="/dashboard" />
-            )
-          }
-        />
-        <Route
-          path="*"
-          element={
-            isLoggedIn ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-          }
-        />
-      </Routes>
-    </Router>
-  );
-};
+    <Routes>
+      {/* If already logged in, redirect away from login/register */}
+      <Route
+        path="/login"
+        element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />}
+      />
+      <Route
+        path="/register"
+        element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />}
+      />
 
-export default App;
+      {/* Protected dashboard */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Default redirect */}
+      <Route
+        path="*"
+        element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
+      />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
+  );
+}

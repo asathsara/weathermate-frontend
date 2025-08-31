@@ -12,3 +12,9 @@ export const login = async (username: string, password: string) => {
     if (res.data.accessToken) setAccessToken(res.data.accessToken);
     return res.data;
 };
+
+export const logout = async () => {
+    await apiClient.post('/logout');
+    setAccessToken("");
+    return true;
+};

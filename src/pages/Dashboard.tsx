@@ -1,65 +1,67 @@
-import { useState, useEffect } from "react";
-import apiClient from "../services/api";
-import type { Weather, History } from "../types";
+import { useState } from "react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { setAccessToken } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
+import { getHistory, getWeather } from "../services/weather";
+import { logout as logoutApi } from "../services/auth";
+import type { Weather, History } from "../types";
 
-
-type DashboardProps = {
-  setIsLoggedIn: (loggedIn: boolean) => void;
-};
-
-export default function Dashboard({ setIsLoggedIn } : DashboardProps) {
+export default function Dashboard() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState<Weather | null>(null);
-  const [history, setHistory] = useState<History[]>([]);
+  const queryClient = useQueryClient();
+  const { setIsLoggedIn } = useAuth();
 
+  // History query (typed + initialData avoids undefined)
+  const { data: history= [], refetch: refetchHistory } = useQuery<History[]>({
+    queryKey: ["history"],
+    queryFn: getHistory,
+    retry: false,
+  });
 
-  const fetchHistory = async () => {
-    try {
-      const res = await apiClient.get('/api/history');
-      setHistory(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+  // Weather query (on-demand)
+  const weatherQuery = useQuery({
+    queryKey: ["weather", city],
+    queryFn: () => getWeather(city),
+    retry: false,
+    enabled: false,
+  });
+
+  const handleSearch = () => {
+    weatherQuery.refetch().then(res => setWeather(res.data ?? null));
+    refetchHistory();
   };
 
-
-  const handleSearch = async () => {
-    try {
-      const res = await apiClient.get(`/api/weather/${city}`);
-      setWeather(res.data);
-      fetchHistory();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleLogout = async () => {
-
-    try {
-      await apiClient.post('/logout');
-      setAccessToken("");
+  // Logout mutation (typed)
+  const logoutMutation = useMutation<boolean, Error, void>({
+    mutationFn: logoutApi,
+    onSuccess: () => {
       setIsLoggedIn(false);
-
-      
-    }catch (err) {
-      console.error(err);
-    }
-  }
-
-
-  useEffect(() => { fetchHistory(); }, []);
-
+      setAccessToken("");
+      queryClient.clear();
+    },
+  });
 
   return (
     <div className="max-w-md mx-auto p-4">
+      <button
+        onClick={() => logoutMutation.mutate()}
+        className="bg-red-300 p-2 text-white rounded mb-4"
+      >
+        Logout
+      </button>
 
-      <button className="bg-red-300 p-2 text-white rounded cursor-pointer" onClick={handleLogout}>Logout</button>
-      <div className="flex gap-2 mb-4 mt-4">
-        <input value={city} onChange={e => setCity(e.target.value)} placeholder="Enter city..." className="border p-2 flex-1" />
-        <button onClick={handleSearch} className="bg-green-500 text-white p-2 rounded">Search</button>
+      <div className="flex gap-2 mb-4">
+        <input
+          value={city}
+          onChange={e => setCity(e.target.value)}
+          placeholder="Enter city..."
+          className="border p-2 flex-1"
+        />
+        <button onClick={handleSearch} className="bg-green-500 text-white p-2 rounded">
+          Search
+        </button>
       </div>
-
 
       {weather && (
         <div className="p-4 border rounded mb-4">
@@ -68,12 +70,11 @@ export default function Dashboard({ setIsLoggedIn } : DashboardProps) {
         </div>
       )}
 
-
       <h3 className="font-semibold mb-2">Search History</h3>
       <ul className="list-disc pl-5">
-        {history.map((h, idx) => (
-          <li key={idx}>
-            {h.id} - {h.city}°C - {h.temperature} ({h.searchedAt})
+        {history.map((h) => (
+          <li key={h.id}>
+            {h.city} - {h.temperature}°C ({h.searchedAt})
           </li>
         ))}
       </ul>
