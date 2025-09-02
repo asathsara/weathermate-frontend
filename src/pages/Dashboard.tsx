@@ -12,15 +12,14 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const { setIsLoggedIn } = useAuth();
 
-
-  // History query (typed + initialData avoids undefined)
-  const { data: history= [], refetch: refetchHistory } = useQuery<History[]>({
+  // History query
+  const { data: history = [], refetch: refetchHistory } = useQuery<History[]>({
     queryKey: ["history"],
     queryFn: getHistory,
     retry: false,
   });
 
-  // Weather query (on-demand)
+  // Weather query
   const weatherQuery = useQuery({
     queryKey: ["weather", city],
     queryFn: () => getWeather(city),
@@ -29,11 +28,12 @@ export default function Dashboard() {
   });
 
   const handleSearch = () => {
-    weatherQuery.refetch().then(res => setWeather(res.data ?? null));
+    if (!city.trim()) return;
+    weatherQuery.refetch().then((res) => setWeather(res.data ?? null));
     refetchHistory();
   };
 
-  // Logout mutation (typed)
+  // Logout mutation
   const logoutMutation = useMutation<boolean, Error, void>({
     mutationFn: logoutApi,
     onSuccess: () => {
@@ -44,41 +44,66 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <button
-        onClick={() => logoutMutation.mutate()}
-        className="bg-red-300 p-2 text-white rounded mb-4"
-      >
-        Logout
-      </button>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          value={city}
-          onChange={e => setCity(e.target.value)}
-          placeholder="Enter city..."
-          className="border p-2 flex-1"
-        />
-        <button onClick={handleSearch} className="bg-green-500 text-white p-2 rounded">
-          Search
-        </button>
-      </div>
-
-      {weather && (
-        <div className="p-4 border rounded mb-4">
-          <h2 className="text-lg font-bold">{city}</h2>
-          <p>{weather.main.temp}°C, {weather.wind.speed}</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white p-6">
+      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-blue-400">🌤️ Weather Dashboard</h1>
+          <button
+            onClick={() => logoutMutation.mutate()}
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition cursor-pointer"
+          >
+            Logout
+          </button>
         </div>
-      )}
 
-      <h3 className="font-semibold mb-2">Search History</h3>
-      <ul className="list-disc pl-5">
-        {history.map((h) => (
-          <li key={h.id}>
-            {h.city} - {h.temperature}°C ({h.searchedAt})
-          </li>
-        ))}
-      </ul>
+        {/* Search */}
+        <div className="flex gap-2 mb-6">
+          <input
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="Enter city..."
+            className="border border-gray-300 p-4 rounded-xl flex-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            onClick={handleSearch}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-xl transition cursor-pointer"
+          >
+            Search
+          </button>
+        </div>
+
+        {/* Weather Card */}
+        {weather && (
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg mb-6">
+            <h2 className="text-xl font-semibold mb-2">{city}</h2>
+            <p className="text-lg">
+              🌡 {weather.main.temp}°C
+            </p>
+            <p className="text-sm opacity-90">💨 {weather.wind.speed} m/s wind</p>
+          </div>
+        )}
+
+        {/* History */}
+        <h3 className="text-lg font-semibold text-gray-700 mb-3">Recent Searches</h3>
+        {history.length > 0 ? (
+          <ul className="space-y-2">
+            {history.map((h) => (
+              <li
+                key={h.id}
+                className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border"
+              >
+                <span className="font-medium">{h.city}</span>
+                <span className="text-gray-500 text-sm">
+                  {h.temperature}°C • {new Date(h.searchedAt).toLocaleString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-400 italic">No searches yet</p>
+        )}
+      </div>
     </div>
   );
 }
