@@ -11,6 +11,7 @@ function AppRoutes() {
   const { isLoggedIn } = useAuth();
 
   return (
+    <div className="font-inter">
     <Routes>
       {/* If already logged in, redirect away from login/register */}
       <Route
@@ -37,7 +38,8 @@ function AppRoutes() {
         path="*"
         element={<Navigate to={isLoggedIn ? "/dashboard" : "/login"} />}
       />
-    </Routes>
+      </Routes>
+      </div>
   );
 }
 
