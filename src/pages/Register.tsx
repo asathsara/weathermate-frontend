@@ -22,10 +22,33 @@ export default function Register() {
     },
   });
 
+  const validateInputs = () => {
+    if (!username.trim()) {
+      setError("Username is required.");
+      return false;
+    }
+    if (username.length < 3) {
+      setError("Username must be at least 3 characters long.");
+      return false;
+    }
+    if (!password.trim()) {
+      setError("Password is required.");
+      return false;
+    }
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (!validateInputs()) return;
+
     mutation.mutate();
   };
 
