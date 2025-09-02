@@ -7,19 +7,17 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  
-  
 
   const mutation = useMutation({
     mutationFn: () => register(username, password),
     onSuccess: () => {
-      setSuccess("Registration successful! You can now login.");
+      setSuccess("🎉 Registration successful! You can now log in.");
       setError("");
       setUsername("");
       setPassword("");
     },
     onError: () => {
-      setError("Registration failed");
+      setError("Registration failed. Please try again.");
       setSuccess("");
     },
   });
@@ -32,21 +30,26 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-white p-6">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4 max-w-sm w-full p-8 bg-white rounded-lg shadow-lg"
+        className="flex flex-col gap-8 max-w-md w-full p-12 bg-white rounded-3xl shadow-2xl border border-gray-100"
       >
-        <h2 className="text-2xl font-semibold text-center text-gray-800">Register</h2>
+        <h2 className="text-3xl font-bold text-center text-blue-400 mb-2">
+          Create Account
+        </h2>
+        <p className="text-center text-blue-500 text-sm mb-4">
+          Sign up to get started
+        </p>
 
-        {error && <p className="text-red-500">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
+        {error && <p className="text-red-500 text-center font-medium">{error}</p>}
+        {success && <p className="text-green-600 text-center font-medium">{success}</p>}
 
         <input
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="border p-3 rounded"
+          className="border border-gray-300 p-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
         />
 
         <input
@@ -54,16 +57,23 @@ export default function Register() {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="border p-3 rounded"
+          className="border border-gray-300 p-5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition"
         />
 
         <button
           type="submit"
           disabled={mutation.status === "pending"}
-          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded cursor-pointer disabled:opacity-50"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold p-5 rounded-xl shadow-md transition duration-300 disabled:opacity-50"
         >
           {mutation.status === "pending" ? "Registering..." : "Sign Up"}
         </button>
+
+        <div className="flex justify-center items-center text-sm text-blue-400 mt-2 space-x-1">
+          <span>Already have an account?</span>
+          <a href="/login" className="hover:text-blue-600 transition font-medium">
+            Login
+          </a>
+        </div>
       </form>
     </div>
   );
