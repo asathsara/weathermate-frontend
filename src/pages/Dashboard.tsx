@@ -12,6 +12,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const { setIsLoggedIn } = useAuth();
 
+
   // History query (typed + initialData avoids undefined)
   const { data: history= [], refetch: refetchHistory } = useQuery<History[]>({
     queryKey: ["history"],

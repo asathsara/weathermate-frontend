@@ -7,6 +7,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  
+  
 
   const mutation = useMutation({
     mutationFn: () => register(username, password),

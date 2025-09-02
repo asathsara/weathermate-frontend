@@ -2,20 +2,18 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/auth";
 import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 
 export default function Login() {
     const { refetch } = useAuth(); // will re-check auth after login
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+   
 
     const mutation = useMutation({
         mutationFn: () => login(username, password),
-        onSuccess: () => {
-            refetch(); // refresh auth
-            navigate("/dashboard", { replace: true });
+        onSuccess:  async () => {
+              refetch(); 
 
         },
         onError: () => {
