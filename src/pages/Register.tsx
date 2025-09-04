@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { register } from "../services/auth";
+import type { AxiosError } from "axios";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -11,15 +12,19 @@ export default function Register() {
   const mutation = useMutation({
     mutationFn: () => register(username, password),
     onSuccess: () => {
-      setSuccess("🎉 Registration successful! You can now log in.");
+      setSuccess("Registration successful! You can now log in.");
       setError("");
       setUsername("");
       setPassword("");
     },
-    onError: () => {
+    onError: (error: AxiosError) => {
+    if (error.response?.status === 409) {
+      setError("Username already exists. Please choose another one.");
+    } else {
       setError("Registration failed. Please try again.");
-      setSuccess("");
-    },
+    }
+    setSuccess("");
+  },
   });
 
   const validateInputs = () => {
@@ -36,7 +41,7 @@ export default function Register() {
       return false;
     }
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError("Password must be at least 8 characters long.");
       return false;
     }
     return true;

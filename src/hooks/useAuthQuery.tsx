@@ -3,12 +3,17 @@ import { refreshClient, setAccessToken } from "../services/api";
 
 async function fetchRefresh() {
 
-    const res = await refreshClient.get("/refresh");
-    if (res.data.accessToken) {
-        setAccessToken(res.data.accessToken);
-        return { isLoggedIn: true, accessToken: res.data.accessToken };
+    try {
+        const res = await refreshClient.get("/refresh");
+        if (res.data.accessToken) {
+            setAccessToken(res.data.accessToken);
+            return { isLoggedIn: true, accessToken: res.data.accessToken };
+        }
     }
-    return { isLoggedIn: false, accessToken: null };
+    catch {
+        return { isLoggedIn: false, accessToken: null };
+    }
+
 }
 
 export function useAuthQuery() {
