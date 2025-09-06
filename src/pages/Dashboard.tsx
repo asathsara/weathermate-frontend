@@ -5,6 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 import { getHistory, getWeather } from "../services/weather";
 import { logout as logoutApi } from "../services/auth";
 import type { Weather, History } from "../types";
+import { clearAuth } from "../auth/auth";
 
 export default function Dashboard() {
   const [city, setCity] = useState("");
@@ -37,6 +38,10 @@ export default function Dashboard() {
   const logoutMutation = useMutation<boolean, Error, void>({
     mutationFn: logoutApi,
     onSuccess: () => {
+
+      // Clear auth state in localStorage
+      clearAuth()
+
       setIsLoggedIn(false);
       setAccessToken("");
       queryClient.clear();

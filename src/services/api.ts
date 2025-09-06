@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAuth } from "../auth/auth";
 
 // Custom error type for authentication errors
 
@@ -48,6 +49,9 @@ apiClient.interceptors.response.use(
             } catch (err) {
 
                 // If refresh fails, log out the user
+                // Clear auth state in localStorage
+                clearAuth()
+                
                 accessToken = null;
                 return Promise.reject(err);
 

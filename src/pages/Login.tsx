@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "../services/auth";
 import { useAuth } from "../hooks/useAuth";
+import { setLoggedIn } from "../auth/auth";
 
 export default function Login() {
     const { refetch } = useAuth();
@@ -12,6 +13,9 @@ export default function Login() {
     const mutation = useMutation({
         mutationFn: () => login(username, password),
         onSuccess: async () => {
+             // ensure localStorage is in sync
+            setLoggedIn(true);
+            
             refetch();
         },
         onError: () => {
