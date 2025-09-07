@@ -98,7 +98,7 @@ export default function Register() {
 
         <div className="flex justify-center items-center text-sm text-blue-400 mt-2 space-x-1">
           <span>Already have an account?</span>
-          <a href="/login" className="hover:text-blue-600 transition font-medium">
+          <a href="#/login" className="hover:text-blue-600 transition font-medium">
             Login
           </a>
         </div>
