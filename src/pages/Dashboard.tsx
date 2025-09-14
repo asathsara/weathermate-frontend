@@ -6,6 +6,7 @@ import { getHistory, getWeather } from "../services/weather";
 import { logout as logoutApi } from "../services/auth";
 import type { Weather, History } from "../types";
 import { clearAuth } from "../auth/auth";
+import { fahrenheitToCelsius } from "../utils/converter";
 
 export default function Dashboard() {
   const [city, setCity] = useState("");
@@ -93,14 +94,14 @@ export default function Dashboard() {
         <h3 className="text-lg font-semibold text-gray-700 mb-3">Recent Searches</h3>
         {history.length > 0 ? (
           <ul className="space-y-2">
-            {history.map((h) => (
+            {history.map((history) => (
               <li
-                key={h.id}
+                key={history.id}
                 className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border"
               >
-                <span className="font-medium">{h.city}</span>
+                <span className="font-medium">{history.city}</span>
                 <span className="text-gray-500 text-sm">
-                  {h.temperature}°C • {new Date(h.searchedAt).toLocaleString()}
+                  {fahrenheitToCelsius(history.temperature)}°C • {new Date(history.searchedAt).toLocaleString()}
                 </span>
               </li>
             ))}
