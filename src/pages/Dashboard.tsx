@@ -10,7 +10,6 @@ import { fahrenheitToCelsius } from "../utils/converter";
 
 export default function Dashboard() {
   const [city, setCity] = useState("");
-  const [weather, setWeather] = useState<Weather | null>(null);
   const queryClient = useQueryClient();
   const { setIsLoggedIn } = useAuth();
 
@@ -21,28 +20,31 @@ export default function Dashboard() {
     retry: false,
   });
 
-  // Weather query
-  const weatherQuery = useQuery({
+  // Weather query (lazy fetch)
+  const {
+    data: weather,
+    refetch: refetchWeather,
+    isLoading: weatherLoading,
+    isError: weatherError,
+  } = useQuery<Weather>({
     queryKey: ["weather", city],
     queryFn: () => getWeather(city),
     retry: false,
-    enabled: false,
+    enabled: false,        // only fetch on search
+    staleTime: 1000 * 60,  // 1 minute cache for better UX
   });
 
   const handleSearch = () => {
     if (!city.trim()) return;
-    weatherQuery.refetch().then((res) => setWeather(res.data ?? null));
+    refetchWeather();
     refetchHistory();
   };
 
   // Logout mutation
-  const logoutMutation = useMutation<boolean, Error, void>({
+  const logoutMutation = useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
-
-      // Clear auth state in localStorage
-      clearAuth()
-
+      clearAuth();
       setIsLoggedIn(false);
       setAccessToken("");
       queryClient.clear();
@@ -80,6 +82,8 @@ export default function Dashboard() {
         </div>
 
         {/* Weather Card */}
+        {weatherLoading && <p>Loading weather...</p>}
+        {weatherError && <p className="text-red-500">Error fetching weather.</p>}
         {weather && (
           <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg mb-6">
             <h2 className="text-xl font-semibold mb-2">{city}</h2>
@@ -94,14 +98,14 @@ export default function Dashboard() {
         <h3 className="text-lg font-semibold text-gray-700 mb-3">Recent Searches</h3>
         {history.length > 0 ? (
           <ul className="space-y-2">
-            {history.map((history) => (
+            {history.map((item) => (
               <li
-                key={history.id}
+                key={item.id}
                 className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border"
               >
-                <span className="font-medium">{history.city}</span>
+                <span className="font-medium">{item.city}</span>
                 <span className="text-gray-500 text-sm">
-                  {fahrenheitToCelsius(history.temperature)}°C • {new Date(history.searchedAt).toLocaleString()}
+                  {fahrenheitToCelsius(item.temperature)}°C • {new Date(item.searchedAt).toLocaleString()}
                 </span>
               </li>
             ))}
