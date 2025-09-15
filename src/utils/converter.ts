@@ -1,8 +1,1 @@
-export const fahrenheitToCelsius = (fahrenheit: number): number=> {
-
-    if (!Number.isNaN(fahrenheit)) {
-        return (fahrenheit - 32) * (5 / 9);
-    }
-    
-    return fahrenheit
-}
+ export const kelvinToCelsius = (kelvin: number) => Math.round(kelvin - 273.15);

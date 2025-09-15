@@ -6,7 +6,7 @@ import { getHistory, getWeather } from "../services/weather";
 import { logout as logoutApi } from "../services/auth";
 import type { Weather, History } from "../types";
 import { clearAuth } from "../auth/auth";
-import { fahrenheitToCelsius } from "../utils/converter";
+import { kelvinToCelsius } from "../utils/converter";
 
 export default function Dashboard() {
   const [city, setCity] = useState("");
@@ -105,7 +105,7 @@ export default function Dashboard() {
               >
                 <span className="font-medium">{item.city}</span>
                 <span className="text-gray-500 text-sm">
-                  {fahrenheitToCelsius(item.temperature)}°C • {new Date(item.searchedAt).toLocaleString()}
+                  {kelvinToCelsius(item.temperature)}°C • {new Date(item.searchedAt).toLocaleString()}
                 </span>
               </li>
             ))}
